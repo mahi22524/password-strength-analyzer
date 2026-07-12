@@ -1,6 +1,9 @@
 import streamlit as st
 import re
 
+from utils import hash_password, generate_strong_password
+from database import create_database, password_exists, save_password
+
 # ---------------------------------
 # Common Password List
 # ---------------------------------
@@ -25,6 +28,7 @@ st.set_page_config(
     page_icon="🔒",
     layout="centered"
 )
+create_database()
 
 # ---------------------------------
 # Title
@@ -35,9 +39,11 @@ st.write("Analyze the strength of your password and receive security recommendat
 # ---------------------------------
 # Password Input
 # ---------------------------------
+show_password = st.checkbox("Show Password")
+
 password = st.text_input(
     "Enter your password",
-    type="password"
+    type="default" if show_password else "password"
 )
 
 # ---------------------------------
@@ -93,13 +99,18 @@ if password:
     # ---------------------------------
     # Password Uniqueness
     # ---------------------------------
-    st.subheader("Password Uniqueness")
+   # ---------------------------------
+# Password Reuse Check
+# ---------------------------------
+st.subheader("Password Reuse Check")
 
-    if password.lower() in COMMON_PASSWORDS:
-        st.error("⚠ This password is commonly used. Choose a more unique password.")
-    else:
-        st.success("✅ This password is not in the common password list.")
+hashed_password = hash_password(password)
 
+if password_exists(hashed_password):
+    st.error("⚠ This password has already been used. Please choose a different password.")
+else:
+    st.success("✅ This password has not been used before.")
+    save_password(hashed_password)
     # ---------------------------------
     # Suggestions
     # ---------------------------------
@@ -123,7 +134,16 @@ if password:
         suggestions.append("Include at least one special character.")
 
     if suggestions:
-        for suggestion in suggestions:
-            st.info(suggestion)
-    else:
-        st.success("Excellent! Your password meets all basic security requirements.")
+     for suggestion in suggestions:
+        st.info(suggestion)
+     else:
+      st.success("Excellent! Your password meets all basic security requirements.")
+
+st.subheader("Suggested Strong Password")
+
+generated_password = generate_strong_password()
+
+st.code(generated_password)
+
+if st.button("Generate Another Password"):
+    st.rerun()
