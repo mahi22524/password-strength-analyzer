@@ -5,20 +5,9 @@ from utils import hash_password, generate_strong_password
 from database import create_database, password_exists, save_password
 
 # ---------------------------------
-# Common Password List
+# Database Initialization
 # ---------------------------------
-COMMON_PASSWORDS = [
-    "password",
-    "password123",
-    "123456",
-    "12345678",
-    "qwerty",
-    "admin",
-    "welcome",
-    "letmein",
-    "abc123",
-    "iloveyou"
-]
+create_database()
 
 # ---------------------------------
 # Page Configuration
@@ -28,7 +17,6 @@ st.set_page_config(
     page_icon="🔒",
     layout="centered"
 )
-create_database()
 
 # ---------------------------------
 # Title
@@ -51,6 +39,7 @@ password = st.text_input(
 # ---------------------------------
 if password:
 
+    # Password Checklist
     st.subheader("Password Checklist")
 
     checks = {
@@ -84,6 +73,7 @@ if password:
 
     progress = score / 5
     st.progress(progress)
+
     st.write(f"**Strength Percentage:** {int(progress * 100)}%")
 
     # ---------------------------------
@@ -97,20 +87,18 @@ if password:
         st.success("🟢 Strong Password")
 
     # ---------------------------------
-    # Password Uniqueness
+    # Password Reuse Check
     # ---------------------------------
-   # ---------------------------------
-# Password Reuse Check
-# ---------------------------------
-st.subheader("Password Reuse Check")
+    st.subheader("Password Reuse Check")
 
-hashed_password = hash_password(password)
+    hashed_password = hash_password(password)
 
-if password_exists(hashed_password):
-    st.error("⚠ This password has already been used. Please choose a different password.")
-else:
-    st.success("✅ This password has not been used before.")
-    save_password(hashed_password)
+    if password_exists(hashed_password):
+        st.error("⚠ This password has already been used. Please choose a different password.")
+    else:
+        st.success("✅ This password has not been used before.")
+        save_password(hashed_password)
+
     # ---------------------------------
     # Suggestions
     # ---------------------------------
@@ -134,16 +122,19 @@ else:
         suggestions.append("Include at least one special character.")
 
     if suggestions:
-     for suggestion in suggestions:
-        st.info(suggestion)
-     else:
-      st.success("Excellent! Your password meets all basic security requirements.")
+        for suggestion in suggestions:
+            st.info(suggestion)
+    else:
+        st.success("Excellent! Your password meets all basic security requirements.")
 
-st.subheader("Suggested Strong Password")
+    # ---------------------------------
+    # Suggested Strong Password
+    # ---------------------------------
+    st.subheader("Suggested Strong Password")
 
-generated_password = generate_strong_password()
+    generated_password = generate_strong_password()
 
-st.code(generated_password)
+    st.code(generated_password)
 
-if st.button("Generate Another Password"):
-    st.rerun()
+    if st.button("Generate Another Password"):
+        st.rerun()
